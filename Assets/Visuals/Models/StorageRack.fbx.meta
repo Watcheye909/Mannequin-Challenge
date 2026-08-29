@@ -1,9 +1,24 @@
 fileFormatVersion: 2
-guid: 6865e6206a5791b4f8bb849fc56b769f
+guid: 58ab195c20e9ad24696edd74d6035474
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Horror_Floor_09-256x256
+    second: {fileID: 2800000, guid: 47f2d887331b9e84384256dcbdc7bc90, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Horror_Metal_10-256x256
+    second: {fileID: 2800000, guid: c7c6d98db6feedf4cb9dfb49f8c92965, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: metal_06-128x128 (1)
+    second: {fileID: 2800000, guid: 476f722370ef96c4091e3d47d03cbe81, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0
