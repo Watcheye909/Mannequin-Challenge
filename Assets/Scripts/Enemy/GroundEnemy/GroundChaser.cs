@@ -13,6 +13,7 @@ public class GroundChaser : MonoBehaviour
     public Transform player;
     public Rigidbody rb;
     public PlayerMovement PM;
+    public Camera playerCam;
     
     public int bounceStrength;
     public float mainJumpForce;
@@ -61,6 +62,25 @@ public class GroundChaser : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //DETECTS THE BOUNDS OF THE PLAYER CAMERA
+        Plane[] planes = GeometryUtility.CalculateFrustumPlanes(playerCam);
+
+        //CHECKS IF THE MANNEQUIN IS IN VIEW
+        if(GeometryUtility.TestPlanesAABB(planes, this.gameObject.GetComponentInChildren<Renderer>().bounds))
+            spotted = true;
+        else if(!GeometryUtility.TestPlanesAABB(planes, this.gameObject.GetComponentInChildren<Renderer>().bounds))
+            spotted = false;
+
+
+        if(spotted)
+            agent.isStopped = true;
+        else
+            agent.isStopped = false;
+
+
+
+
+        //DETECTS WHEN THE PLAYER IS IN THE RANGE OF THE MANNEQUIN TO CHASE
         playerInSightRange = Physics.CheckSphere(transform.position, sightRange, isPlayer);
 
         if(!playerInSightRange) Roam();
@@ -78,10 +98,6 @@ public class GroundChaser : MonoBehaviour
             Invoke(nameof(DestroyEnemy), 0.1f);
         }
 
-        if(spotted)
-            agent.isStopped = true;
-        else
-            agent.isStopped = false; 
     }
 
     private void Roam()
