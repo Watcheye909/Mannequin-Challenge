@@ -26,7 +26,8 @@ public class BasicMannequin : MonoBehaviour
             spotted = false;
 
 
+        Vector3 playerPos = new Vector3(player.position.x, transform.position.y, player.position.z);
         if(!spotted)
-        transform.LookAt(player);
+        transform.LookAt(playerPos);
     }
 }
