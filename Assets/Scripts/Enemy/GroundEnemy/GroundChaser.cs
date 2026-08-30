@@ -22,6 +22,7 @@ public class GroundChaser : MonoBehaviour
 
     public bool playerInSightRange;
     public bool spotted;
+    public bool angry;
     bool hit;
     bool hurt;
     bool isBouncing;
@@ -57,6 +58,8 @@ public class GroundChaser : MonoBehaviour
         //Setting bools to false
         playerInSightRange = false;
         isBouncing = false;
+
+        angry = false;
     }
 
     // Update is called once per frame
@@ -72,10 +75,19 @@ public class GroundChaser : MonoBehaviour
             spotted = false;
 
 
-        if(spotted)
-            agent.isStopped = true;
-        else
+        if(!angry)
+        {
+            if(spotted)
+                agent.isStopped = true;
+            else if(!spotted)
+                agent.isStopped = false;
+        }
+
+        else if(angry)
+        {
+            agent.speed = 13;
             agent.isStopped = false;
+        }
 
 
 
