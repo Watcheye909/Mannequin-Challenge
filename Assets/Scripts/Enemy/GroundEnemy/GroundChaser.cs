@@ -114,7 +114,7 @@ public class GroundChaser : MonoBehaviour
         {
             Invoke("resetDamage", 0.05f);
             Debug.Log("Enemy Got Clapped!!!");
-            Invoke(nameof(DestroyEnemy), 0.1f);
+            //Invoke(nameof(DestroyEnemy), 0.1f);
         }
 
     }
@@ -204,7 +204,8 @@ public class GroundChaser : MonoBehaviour
         hit = true;
         //resetDamage();
         //Invoke("resetDamage", 0.1f);
-        Destroy(gameObject);
+        gameObject.SetActive(false);
+        //Destroy(gameObject);
     }
 
     private void OnTriggerEnter(Collider collision)

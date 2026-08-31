@@ -19,7 +19,7 @@ public class SpiritGun : MonoBehaviour
     public int damage;
     public bool allowButtonHold;
 
-    public int bulletsLeft, bulletsShot;
+    public int bulletsLeft;
 
     //bools
     public bool shooting, readyToShoot, reloading;
@@ -28,6 +28,13 @@ public class SpiritGun : MonoBehaviour
     //reference
     public Camera fpsCam;
     public Transform attackPoint;
+    public LayerMask EnemyLayer;
+    public GroundChaser groundChaser;
+
+    //audio
+    public AudioSource gunShotAudio;
+    public AudioSource reloadAudio;
+    public AudioSource chargedAudio;
 
     //Graphics
     public GameObject muzzleFlash;
@@ -36,6 +43,13 @@ public class SpiritGun : MonoBehaviour
     //bug fixing 
     public bool allowInvoke = true;
 
+    [Header("Debug")]
+    public bool showRaycastDebug = true;
+    public Color raycastColor = Color.red;
+    public float raycastDistance = 10f;
+
+    private Vector3 debugRayStart;
+    private Vector3 debugRayEnd;
 
     private void Awake()
     {
@@ -48,6 +62,8 @@ public class SpiritGun : MonoBehaviour
     void Update()
     {
         MyInput();
+        if(bulletsLeft > 0 && !reloading && !readyToShoot)
+        ResetShot();
 
         //set ammo display, if it exists
         if (ammunitionDisplay != null)
@@ -75,13 +91,13 @@ public class SpiritGun : MonoBehaviour
         //shooting
         if(readyToShoot && shooting && !reloading && bulletsLeft > 0)
         {
-            bulletsShot = 0;
             bulletReady = true;
             //Shoot();
         }
         
 
 
+    /*
         //reloading
         if (Input.GetKeyDown(KeyCode.R) && bulletsLeft < magazineSize && !reloading)
         {
@@ -92,6 +108,8 @@ public class SpiritGun : MonoBehaviour
         {
             Reload();
         }
+
+    */
     }
 
 
@@ -101,65 +119,48 @@ public class SpiritGun : MonoBehaviour
     {
         //shooting animation
         //animator.SetBool("Shooting", true);
-        
-        readyToShoot = false;
-        
 
-        //find the exact hit position using a raycast
+        readyToShoot = false;
+
         Ray ray = fpsCam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         RaycastHit hit;
 
-        //check if ray hits something
-        Vector3 targetPoint;
-        if (Physics.Raycast(ray, out hit))
-            targetPoint = hit.point;
-        else
-            targetPoint = ray.GetPoint(75); //just a point far away from the player
+        debugRayStart = attackPoint.position;
+        debugRayEnd = ray.GetPoint(raycastDistance);
 
-        //calculate direction from attackPoint to targetPoint
-        Vector3 directionWithoutSpread = targetPoint - attackPoint.position;
+        if (Physics.Raycast(ray, out hit, raycastDistance, EnemyLayer))
+        {
+            //GroundChaser groundChaser = hit.collider.GetComponentInParent<GroundChaser>();
+            groundChaser = hit.collider.GetComponentInParent<GroundChaser>();
+            Debug.Log("Current guy:" + groundChaser);
+            debugRayEnd = hit.point;
 
-        //calculate spread
-        float x = Random.Range(-spread, spread);
-        float y = Random.Range(-spread, spread);
-
-        //calculate new direction with spread
-        Vector3 directionWithSpread = directionWithoutSpread + new Vector3(x, y, 0);
-
-        //Instantiate bullet/projectile
-        GameObject currentBullet = Instantiate(bullet, attackPoint.position, Quaternion.identity);
-
-        //rotate bullet to shoot direction
-        currentBullet.transform.forward = directionWithSpread.normalized;
+            if (groundChaser != null)
+                groundChaser.takeDamage(damage);
+        }
 
 
-        Rigidbody rb = currentBullet.GetComponent<Rigidbody>();
-
-        //add forces to bullet
-        //Vector3 velocity=directionWithSpread.normalized*shootForce;
-        //rb.MovePosition(rb.position+(velocity * Time.fixedDeltaTime));
-
-        rb.AddForce(directionWithSpread.normalized * shootForce, ForceMode.Impulse);
-        rb.AddForce(fpsCam.transform.up *upwardForce, ForceMode.Impulse);
-
-        //
+        gunShotAudio.enabled = true;
 
         //Instantiate muzzle flash, if you have one
         if (muzzleFlash != null)
-            Instantiate(muzzleFlash, attackPoint.position, Quaternion.identity); 
+            Instantiate(muzzleFlash, attackPoint.position, Quaternion.identity);
 
         bulletsLeft--;
-        bulletsShot++;
 
-        if(allowInvoke)
+        if (allowInvoke)
         {
-            Invoke("ResetShot", timeBetweenShooting);
+            Invoke("Reload", timeBetweenShooting);
+            //Invoke("ResetShot", timeBetweenShooting); OLD
             allowInvoke = false;
         }
 
+
+    /*
         //if more than one bulletsPerTap repeat shoot function
         if (bulletsShot < bulletsPerTap && bulletsLeft > 0)
             Invoke("Shoot", fireRate);
+    */
 
         bulletReady = false;
     }
@@ -167,22 +168,43 @@ public class SpiritGun : MonoBehaviour
     private void ResetShot()
     {
         //allow shooting and invoking again
-        animator.SetBool("Shooting", false);
+        //animator.SetBool("Shooting", false);
         readyToShoot = true;
         allowInvoke = true;
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (!showRaycastDebug || fpsCam == null || attackPoint == null)
+            return;
+
+        Ray ray = fpsCam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+        Vector3 end = ray.GetPoint(raycastDistance);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, raycastDistance, EnemyLayer))
+            end = hit.point;
+
+        Gizmos.color = raycastColor;
+        Gizmos.DrawLine(attackPoint.position, end);
+        Gizmos.DrawSphere(end, 0.05f);
     }
 
     private void Reload()
     {
         reloading = true;
+        gunShotAudio.enabled = false;
+        reloadAudio.enabled = true;
         Invoke("ReloadFinished", reloadTime);
-        animator.SetBool("Reloading", true);
+        //animator.SetBool("Reloading", true);
     }
 
     private void ReloadFinished()
     {
+        chargedAudio.enabled = false;
         bulletsLeft = magazineSize;
         reloading = false;
-        animator.SetBool("Reloading", false);
+        reloadAudio.enabled = false;
+        chargedAudio.enabled = true;
+        //animator.SetBool("Reloading", false);
     }
 }

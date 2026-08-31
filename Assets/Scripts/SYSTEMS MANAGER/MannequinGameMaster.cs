@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class MannequinGameMaster : MonoBehaviour
 {
+    private static MannequinGameMaster instance;
     public Timer timer;
     public GameObject LiveMannequin;
     public GroundChaser GC;
@@ -14,7 +15,7 @@ public class MannequinGameMaster : MonoBehaviour
     public int stageSelect;
 
 
-    public int currentRound;
+    public int playerScore;
     public bool nextRoundReady;
     public bool roundFailed;
 
@@ -26,6 +27,8 @@ public class MannequinGameMaster : MonoBehaviour
     [Header("KeyCode")]
     public KeyCode returnKey;
 
+
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -34,6 +37,14 @@ public class MannequinGameMaster : MonoBehaviour
         
         //GC = GameObject.Find("LIVING MANNEQUIN").GetComponent<GroundChaser>();
         randomIndex = UnityEngine.Random.Range(0, 3);
+
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(instance);
+        }
+        else
+            Destroy(gameObject);
         
         
         //RandomizeMannequinCheck();
@@ -45,19 +56,36 @@ public class MannequinGameMaster : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //  =====>ROUND SETUP<======
+        
         // 1. Get the currently active scene
         Scene currentScene = SceneManager.GetActiveScene();
 
         // 2. Check if the scene name matches your target scene
-        if (currentScene.name != "Intro")
+        if (currentScene.name != "Intro" && GC == null && roundFailed == false)
             RandomizeMannequinCheck();
 
+        if(timer == null)
+        ReassignVariables();
+
+
+
+        //  =====>Win Condition Check<======
 
         if(GC != null && GC.health <= 0)
         {
+            LiveMannequin.SetActive(false);
             nextRoundReady = true;
         }
 
+        if(nextRoundReady)
+        {
+            NextRoundSwitch();
+            return;
+        }
+
+
+        //  =====>Lose Condition<======
 
         if(timer.currentTime <= 0)
             roundFailed = true;
@@ -71,11 +99,13 @@ public class MannequinGameMaster : MonoBehaviour
 
         if(playerDied)
         {
-            currentRound = 0;
+            playerScore = 0;
             GC.angry = false;
             playerDied = false;
         }
         
+
+        //  =====>Intro Scene Skip<======
 
 
         if (Input.GetKey(returnKey))
@@ -88,16 +118,31 @@ public class MannequinGameMaster : MonoBehaviour
 
     void NextRoundSwitch()
     {
+        if (!nextRoundReady)
+            return;
+
+        nextRoundReady = false;
+        playerScore++;
         randomIndex = UnityEngine.Random.Range(0, 3);
-        RandomizeMannequinCheck();
+
+        //randomIndex = UnityEngine.Random.Range(0, 3);
+        //RandomizeMannequinCheck();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     void LoseRound()
     {
+        playerScore = 0;
         if(GC.attacking)
         {
             playerDied = true;
         }
+    }
+
+
+    void ReassignVariables()
+    {
+        timer = GameObject.Find("PLAYER UI").GetComponent<Timer>();
     }
 
     void RandomizeMannequinCheck()
@@ -108,22 +153,22 @@ public class MannequinGameMaster : MonoBehaviour
             case 0:
                 LiveMannequin = GameObject.Find("LIVING MANNEQUIN 1");
                 GC = LiveMannequin.GetComponent<GroundChaser>();
-                Debug.Log("is 0");
+                //Debug.Log("is 0");
                 break;
             case 1:
                 LiveMannequin = GameObject.Find("LIVING MANNEQUIN 2");
                 GC = LiveMannequin.GetComponent<GroundChaser>();
-                Debug.Log("is 1");
+                //Debug.Log("is 1");
                 break;
             case 2:
                 LiveMannequin = GameObject.Find("LIVING MANNEQUIN 3");
                 GC = LiveMannequin.GetComponent<GroundChaser>();
-                Debug.Log("is 2");
+                //Debug.Log("is 2");
                 break;
             case 3:
                 LiveMannequin = GameObject.Find("LIVING MANNEQUIN 4");
                 GC = LiveMannequin.GetComponent<GroundChaser>();
-                Debug.Log("is 3");
+                //Debug.Log("is 3");
                 break;
         }
 
