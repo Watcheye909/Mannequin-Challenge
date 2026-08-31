@@ -26,10 +26,18 @@ public class SpiritGun : MonoBehaviour
     public bool bulletReady;
 
     //reference
+    public PlayerCamera playerCam;
     public Camera fpsCam;
     public Transform attackPoint;
     public LayerMask EnemyLayer;
     public GroundChaser groundChaser;
+    
+    
+    [Header("Camera")]
+    public float shakeAmt;
+    public float shakeLength;
+
+    [Header("Effects")]
 
     //audio
     public AudioSource gunShotAudio;
@@ -40,10 +48,10 @@ public class SpiritGun : MonoBehaviour
     public GameObject muzzleFlash;
     public TextMeshProUGUI ammunitionDisplay;
 
+    [Header("Debug")]
     //bug fixing 
     public bool allowInvoke = true;
 
-    [Header("Debug")]
     public bool showRaycastDebug = true;
     public Color raycastColor = Color.red;
     public float raycastDistance = 10f;
@@ -140,6 +148,8 @@ public class SpiritGun : MonoBehaviour
         }
 
 
+        //EFFECTS
+        playerCam.DoShake(shakeAmt, shakeLength);
         gunShotAudio.enabled = true;
 
         //Instantiate muzzle flash, if you have one

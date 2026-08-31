@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 public class MannequinGameMaster : MonoBehaviour
 {
     private static MannequinGameMaster instance;
+    public PlayerCamera playerCam;
     public Timer timer;
     public GameObject LiveMannequin;
     public GroundChaser GC;
@@ -24,6 +25,10 @@ public class MannequinGameMaster : MonoBehaviour
 
     public bool playerDied;
 
+    [Header("Camera Settings")]
+    public float shakeAmt;
+    public float shakeLength;
+
     [Header("KeyCode")]
     public KeyCode returnKey;
 
@@ -33,6 +38,7 @@ public class MannequinGameMaster : MonoBehaviour
     void Start()
     {
         //search and assign variables
+        playerCam = GameObject.Find("Main Camera").GetComponent<PlayerCamera>();
         timer = GameObject.Find("PLAYER UI").GetComponent<Timer>();
         
         //GC = GameObject.Find("LIVING MANNEQUIN").GetComponent<GroundChaser>();
@@ -69,6 +75,16 @@ public class MannequinGameMaster : MonoBehaviour
         ReassignVariables();
 
 
+        // =====>During Round<=====
+
+        if(timer.currentTime <= 30f)
+            playerCam.DoShake(shakeAmt, shakeLength);
+        
+        else if(timer.currentTime <= 20f)
+            playerCam.DoShake(shakeAmt*2, shakeLength);
+
+        else if(timer.currentTime <= 10f)
+            playerCam.DoShake(shakeAmt*3, shakeLength);
 
         //  =====>Win Condition Check<======
 
@@ -142,6 +158,7 @@ public class MannequinGameMaster : MonoBehaviour
 
     void ReassignVariables()
     {
+        playerCam = GameObject.Find("Main Camera").GetComponent<PlayerCamera>();
         timer = GameObject.Find("PLAYER UI").GetComponent<Timer>();
     }
 

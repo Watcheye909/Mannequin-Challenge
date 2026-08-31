@@ -23,6 +23,27 @@ public class PlayerCamera : MonoBehaviour
         DOTween.SetTweensCapacity(500,20);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+
+        //LETS THE PLAYER ROTATION BE CHANGED DEPENDING ON THE ROTATION THEY HAVE IN THE EDITOR
+        if (orientation != null)
+        {
+            yRotation = orientation.eulerAngles.y;
+        }
+        else
+        {
+            yRotation = transform.eulerAngles.y;
+        }
+
+        if (camHolder != null)
+        {
+            xRotation = camHolder.localEulerAngles.x;
+        }
+        else
+        {
+            xRotation = transform.localEulerAngles.x;
+        }
+        //SPECIFIC COMMAND ENDS HERE
     }
 
     // Update is called once per frame
@@ -57,9 +78,14 @@ public class PlayerCamera : MonoBehaviour
 
     public void DoShake(float shakeAmt, float length)
     {
-        Vector3 originalPos = transform.localPosition;
+        DOTween.Kill(transform, false);
+
+        Vector3 originalPos = transform.position;
         Sequence shakeSequence = DOTween.Sequence();
         shakeSequence.Append(transform.DOShakePosition(length, new Vector3(shakeAmt, shakeAmt, 0), vibrato: 10, randomness: 0.5f, snapping: false, fadeOut: true));
-        shakeSequence.Append(transform.DOLocalMove(originalPos, 0.1f));
+        shakeSequence.OnComplete(() =>
+        {
+            transform.position = originalPos;
+        });
     }
 }
