@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MannequinGameMaster : MonoBehaviour
 {
@@ -10,6 +11,8 @@ public class MannequinGameMaster : MonoBehaviour
     
     public GameObject mannequinSquad;
 
+    public int stageSelect;
+
 
     public int currentRound;
     public bool nextRoundReady;
@@ -17,6 +20,11 @@ public class MannequinGameMaster : MonoBehaviour
 
     public bool randomize;
     public int randomIndex;
+
+    public bool playerDied;
+
+    [Header("KeyCode")]
+    public KeyCode returnKey;
 
     // Start is called before the first frame update
     void Start()
@@ -37,7 +45,12 @@ public class MannequinGameMaster : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        RandomizeMannequinCheck();
+        // 1. Get the currently active scene
+        Scene currentScene = SceneManager.GetActiveScene();
+
+        // 2. Check if the scene name matches your target scene
+        if (currentScene.name != "Intro")
+            RandomizeMannequinCheck();
 
 
         if(GC != null && GC.health <= 0)
@@ -53,16 +66,38 @@ public class MannequinGameMaster : MonoBehaviour
         if(roundFailed)
         {
             GC.angry = true;
+            LoseRound();
+        }
+
+        if(playerDied)
+        {
+            currentRound = 0;
+            GC.angry = false;
+            playerDied = false;
         }
         
 
+
+        if (Input.GetKey(returnKey))
+            {
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+            }
         
     }
 
 
-    void nextRoundSwitch()
+    void NextRoundSwitch()
     {
+        randomIndex = UnityEngine.Random.Range(0, 3);
+        RandomizeMannequinCheck();
+    }
 
+    void LoseRound()
+    {
+        if(GC.attacking)
+        {
+            playerDied = true;
+        }
     }
 
     void RandomizeMannequinCheck()

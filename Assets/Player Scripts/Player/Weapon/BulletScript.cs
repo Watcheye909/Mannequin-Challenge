@@ -52,5 +52,8 @@ public class BulletScript : MonoBehaviour
 
         if (!hurtEnemy)
             animator.SetBool("Hit", false);
+
+        
+        Destroy(gameObject);
     }
 }
