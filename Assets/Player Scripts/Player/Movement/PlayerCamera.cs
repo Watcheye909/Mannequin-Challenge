@@ -79,13 +79,6 @@ public class PlayerCamera : MonoBehaviour
     public void DoShake(float shakeAmt, float length)
     {
         DOTween.Kill(transform, false);
-
-        Vector3 originalPos = transform.position;
-        Sequence shakeSequence = DOTween.Sequence();
-        shakeSequence.Append(transform.DOShakePosition(length, new Vector3(shakeAmt, shakeAmt, 0), vibrato: 10, randomness: 0.5f, snapping: false, fadeOut: true));
-        shakeSequence.OnComplete(() =>
-        {
-            transform.position = originalPos;
-        });
+        transform.DOShakePosition(length, new Vector3(shakeAmt, shakeAmt, 0), vibrato: 10, randomness: 0.5f, snapping: false, fadeOut: true);
     }
 }

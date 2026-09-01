@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class MannequinGameMaster : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class MannequinGameMaster : MonoBehaviour
 
 
     public int playerScore;
+    public TextMeshProUGUI scoreDisplay;
     public bool nextRoundReady;
     public bool roundFailed;
 
@@ -40,6 +42,7 @@ public class MannequinGameMaster : MonoBehaviour
         //search and assign variables
         playerCam = GameObject.Find("Main Camera").GetComponent<PlayerCamera>();
         timer = GameObject.Find("PLAYER UI").GetComponent<Timer>();
+        scoreDisplay = GameObject.Find("score(TMP)").GetComponent<TextMeshProUGUI>();
         
         //GC = GameObject.Find("LIVING MANNEQUIN").GetComponent<GroundChaser>();
         randomIndex = UnityEngine.Random.Range(0, 3);
@@ -97,6 +100,7 @@ public class MannequinGameMaster : MonoBehaviour
         if(nextRoundReady)
         {
             NextRoundSwitch();
+            UpdateScoreDisplay();
             return;
         }
 
@@ -116,6 +120,7 @@ public class MannequinGameMaster : MonoBehaviour
         if(playerDied)
         {
             playerScore = 0;
+            UpdateScoreDisplay();
             GC.angry = false;
             playerDied = false;
         }
@@ -160,6 +165,13 @@ public class MannequinGameMaster : MonoBehaviour
     {
         playerCam = GameObject.Find("Main Camera").GetComponent<PlayerCamera>();
         timer = GameObject.Find("PLAYER UI").GetComponent<Timer>();
+        scoreDisplay = GameObject.Find("score(TMP)").GetComponent<TextMeshProUGUI>();
+    }
+
+    void UpdateScoreDisplay()
+    {
+        if(scoreDisplay != null)
+            scoreDisplay.text = "Score: " + playerScore;
     }
 
     void RandomizeMannequinCheck()

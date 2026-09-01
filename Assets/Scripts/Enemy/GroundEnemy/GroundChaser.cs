@@ -90,7 +90,8 @@ public class GroundChaser : MonoBehaviour
 
         else if(angry)
         {
-            agent.speed = 13;
+            sightRange = 50;
+            agent.speed = 20;
             agent.isStopped = false;
         }
 
