@@ -7,7 +7,7 @@ public class GroundChaser : MonoBehaviour
 {
 
     [Header("SETUP")]
-    public ProjectileGun PG;
+    public SpiritGun SG;
     public NavMeshAgent agent;
     public LayerMask whatIsGround, isPlayer;
     public Transform player;
@@ -21,7 +21,10 @@ public class GroundChaser : MonoBehaviour
     float moveTime;
 
     public bool playerInSightRange;
+    public bool playerInAttackRange;
+    public bool attacking;
     public bool spotted;
+    public bool angry;
     bool hit;
     bool hurt;
     bool isBouncing;
@@ -40,6 +43,7 @@ public class GroundChaser : MonoBehaviour
     public float damage;
     public float knockbackForce;
     public float sightRange;
+    public float attackRange;
 
     // Start is called before the first frame update
     void Start()
@@ -56,7 +60,11 @@ public class GroundChaser : MonoBehaviour
 
         //Setting bools to false
         playerInSightRange = false;
+        playerInAttackRange = false;
         isBouncing = false;
+
+        angry = false;
+        attacking = false;
     }
 
     // Update is called once per frame
@@ -72,19 +80,30 @@ public class GroundChaser : MonoBehaviour
             spotted = false;
 
 
-        if(spotted)
-            agent.isStopped = true;
-        else
+        if(!angry)
+        {
+            if(spotted)
+                agent.isStopped = true;
+            else if(!spotted)
+                agent.isStopped = false;
+        }
+
+        else if(angry)
+        {
+            agent.speed = 13;
             agent.isStopped = false;
+        }
 
 
 
 
         //DETECTS WHEN THE PLAYER IS IN THE RANGE OF THE MANNEQUIN TO CHASE
         playerInSightRange = Physics.CheckSphere(transform.position, sightRange, isPlayer);
+        playerInAttackRange = Physics.CheckSphere(transform.position, attackRange, isPlayer);
 
         if(!playerInSightRange) Roam();
         if(playerInSightRange) Chase();
+        if(playerInAttackRange) Attack();
 
 
         if(isBouncing)
@@ -95,7 +114,7 @@ public class GroundChaser : MonoBehaviour
         {
             Invoke("resetDamage", 0.05f);
             Debug.Log("Enemy Got Clapped!!!");
-            Invoke(nameof(DestroyEnemy), 0.1f);
+            //Invoke(nameof(DestroyEnemy), 0.1f);
         }
 
     }
@@ -121,6 +140,21 @@ public class GroundChaser : MonoBehaviour
         {
             walkPointSet = false;
             //lastWalkPoint = walkPoint;
+        }
+    }
+
+    void Attack()
+    {
+        if(!angry)
+        {
+            attacking = false;
+        }
+            //SG.bulletsLeft = 0;
+
+        if(angry)
+        {
+            //transform.LookAt(player);
+            attacking = true;
         }
     }
 
@@ -170,7 +204,8 @@ public class GroundChaser : MonoBehaviour
         hit = true;
         //resetDamage();
         //Invoke("resetDamage", 0.1f);
-        Destroy(gameObject);
+        gameObject.SetActive(false);
+        //Destroy(gameObject);
     }
 
     private void OnTriggerEnter(Collider collision)
@@ -210,7 +245,7 @@ public class GroundChaser : MonoBehaviour
 
         if (collision.gameObject.layer == 10)
         {
-            takeDamage(PG.damage);
+            takeDamage(SG.damage);
         }
     }
 
